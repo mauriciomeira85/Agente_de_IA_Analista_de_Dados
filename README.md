@@ -26,7 +26,8 @@ natural — ambos lendo **as mesmas views**, para nunca divergirem.
 ## 2. Demonstração
 
 - URL pública: `https://agenteanalistadedados.projetostechmauricio.lol`
-- _(espaço reservado para vídeos de demonstração)_
+
+https://github.com/user-attachments/assets/5645e606-f90b-4779-95ef-5e4929c468d6
 
 ## 3. Funcionalidades
 
