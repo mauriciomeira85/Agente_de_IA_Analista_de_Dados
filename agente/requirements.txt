@@ -1,0 +1,18 @@
+# INTRODUÇÃO
+# Dependências do serviço do agente de IA (FastAPI + Agno + DeepSeek).
+# Escolhas: reportlab+matplotlib para PDF (mais leve que WeasyPrint: sem
+# pango/cairo, importante para o limite de 384 MB na VM); openpyxl para Excel;
+# sqlglot para a validação de SQL; PyYAML para a avaliação; pytest+ruff (dev).
+# RESUMO: api web + framework de agente + banco + relatórios + validação SQL.
+fastapi==0.118.0
+uvicorn[standard]==0.37.0
+agno==3.0.11
+openai==1.109.1
+psycopg2-binary==2.9.10
+sqlglot==27.10.0
+reportlab==4.4.3
+matplotlib==3.10.6
+openpyxl==3.1.5
+PyYAML==6.0.2
+pytest==8.4.2
+ruff==0.13.1

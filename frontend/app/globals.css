@@ -1,0 +1,44 @@
+/* INTRODUÇÃO
+   Folha de estilos global do frontend (Tailwind CSS v4). O @import traz todas
+   as utilidades; abaixo só variáveis de tema e ajustes de base (fonte, cor de
+   fundo, scrollbars do chat). Os componentes components/ui seguem o padrão
+   visual shadcn/ui sobre essas variáveis.
+   RESUMO: Tailwind v4 + tema claro neutro com cor de destaque âmbar. */
+
+@import "tailwindcss";
+
+:root {
+  --fundo: #f8fafc;
+  --cartao: #ffffff;
+  --texto: #0f172a;
+  --texto-suave: #64748b;
+  --borda: #e2e8f0;
+  --destaque: #b45309; /* âmbar escuro: identidade da Serra Clara Imóveis */
+  --destaque-suave: #fef3c7;
+}
+
+body {
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+/* Markdown das respostas do agente (o Tailwind v4 zera os estilos padrão). */
+.resposta-agente p, .resposta-agente ul, .resposta-agente ol { margin: 0.35rem 0; }
+.resposta-agente ul { list-style: disc; padding-left: 1.2rem; }
+.resposta-agente ol { list-style: decimal; padding-left: 1.2rem; }
+.resposta-agente h1, .resposta-agente h2, .resposta-agente h3 { font-weight: 600; margin: 0.6rem 0 0.3rem; }
+.resposta-agente code { font-size: 0.75rem; background: #e2e8f0; padding: 0 0.25rem; border-radius: 3px; }
+.resposta-agente table { display: block; overflow-x: auto; border-collapse: collapse; font-size: 0.75rem; margin: 0.5rem 0; }
+.resposta-agente th, .resposta-agente td { border: 1px solid var(--borda); padding: 0.25rem 0.5rem; white-space: nowrap; }
+.resposta-agente th { background: #e2e8f0; text-align: left; }
+.resposta-agente tr:nth-child(even) td { background: #ffffff; }
+
+/* Scrollbar discreta para o chat e tabelas em telas pequenas */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}

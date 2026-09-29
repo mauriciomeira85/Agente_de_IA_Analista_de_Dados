@@ -1,0 +1,2 @@
+# Arquivos estáticos públicos do frontend (favicon, imagens). Mantida no Git
+# com este marcador porque o Dockerfile copia esta pasta na imagem final.

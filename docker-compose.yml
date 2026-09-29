@@ -1,0 +1,128 @@
+# INTRODUÇÃO
+# Orquestração de todos os serviços do Agente Analista de Dados:
+#   db        -> PostgreSQL 16 (alpine), migrações aplicadas na 1ª subida via initdb;
+#   gerador   -> carga dos dados fictícios na 1ª subida (só se o banco estiver vazio);
+#   agente    -> API FastAPI + Agno (aba "Agente de IA");
+#   frontend  -> Next.js (abas Dashboard e Agente de IA);
+#   tunnel    -> cloudflared (profile "publica"), publica o frontend sem abrir portas.
+# Decisões: nome de projeto próprio para isolar de outros projetos da VM; portas de
+# teste presas em 127.0.0.1 (nunca 0.0.0.0); limites de memória em todos os serviços
+# para o projeto inteiro ficar abaixo de ~1 GB na VM compartilhada.
+# RESUMO: `docker compose up -d --build` sobe banco + carga + agente + frontend;
+# o profile "publica" sobe o túnel Cloudflare.
+
+name: agente_analista_dados
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: agente_analista_dados-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: analista_dados
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      # Senhas dos usuários de aplicação, consumidas pela migração 000_usuarios.sh.
+      SENHA_USUARIO_DASHBOARD: ${SENHA_USUARIO_DASHBOARD:?}
+      SENHA_USUARIO_AGENTE: ${SENHA_USUARIO_AGENTE:?}
+      SENHA_USUARIO_GERADOR: ${SENHA_USUARIO_GERADOR:?}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Migrações versionadas: o initdb do Postgres executa .sh e .sql em ordem
+      # alfabética apenas quando o volume está vazio (subida "do zero").
+      - ./banco/migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      # Somente loopback: facilita desenvolvimento/teste sem expor o banco.
+      - "127.0.0.1:15432:5432"
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d analista_dados"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [rede_interna]
+
+  gerador:
+    build: ./dados
+    container_name: agente_analista_dados-gerador
+    command: ["python", "gerar_dados.py", "--se-vazio"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGDATABASE: analista_dados
+      PGUSER: app_gerador
+      PGPASSWORD: ${SENHA_USUARIO_GERADOR:?}
+    mem_limit: 256m
+    networks: [rede_interna]
+
+  agente:
+    build: ./agente
+    container_name: agente_analista_dados-agente
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      gerador:
+        condition: service_completed_successfully
+    environment:
+      PGHOST: db
+      PGDATABASE: analista_dados
+      PGUSER: app_agente
+      PGPASSWORD: ${SENHA_USUARIO_AGENTE:?}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?}
+      MODELO_AGENTE: ${MODELO_AGENTE:-deepseek-flash}
+      PRECO_ENTRADA_USD_1M: ${PRECO_ENTRADA_USD_1M:-0.30}
+      PRECO_SAIDA_USD_1M: ${PRECO_SAIDA_USD_1M:-1.20}
+      TETO_CUSTO_DIARIO_USD: ${TETO_CUSTO_DIARIO_USD:-2.00}
+      LIMITE_PERGUNTAS_POR_HORA: ${LIMITE_PERGUNTAS_POR_HORA:-20}
+      LIMITE_PASSOS_FERRAMENTA: ${LIMITE_PASSOS_FERRAMENTA:-8}
+    ports:
+      - "127.0.0.1:18100:8000"
+    volumes:
+      # Arquivos gerados (PDF/Excel) ficam em volume próprio, apagados após 24 h.
+      - arquivos_gerados:/app/arquivos_gerados
+    mem_limit: 384m
+    networks: [rede_interna]
+
+  frontend:
+    build: ./frontend
+    container_name: agente_analista_dados-frontend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      agente:
+        condition: service_started
+    environment:
+      PGHOST: db
+      PGDATABASE: analista_dados
+      PGUSER: app_dashboard
+      PGPASSWORD: ${SENHA_USUARIO_DASHBOARD:?}
+      AGENTE_URL: http://agente:8000
+    ports:
+      - "127.0.0.1:13000:3000"
+    mem_limit: 256m
+    networks: [rede_interna]
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: agente_analista_dados-tunnel
+    profiles: ["publica"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      - frontend
+    mem_limit: 64m
+    networks: [rede_interna]
+
+volumes:
+  pgdata:
+  arquivos_gerados:
+
+networks:
+  rede_interna:
+    driver: bridge

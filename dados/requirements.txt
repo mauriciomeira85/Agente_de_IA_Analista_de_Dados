@@ -1,0 +1,6 @@
+# INTRODUÇÃO
+# Dependências do serviço gerador de dados fictícios (profile "carga" do compose).
+# Mantidas no mínimo para a imagem ficar enxuta (limite de 256 MB na VM).
+# RESUMO: psycopg2 (fala com o Postgres) + Faker pt_BR (nomes fictícios).
+psycopg2-binary==2.9.10
+Faker==37.4.0

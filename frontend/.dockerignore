@@ -1,0 +1,10 @@
+# INTRODUÇÃO
+# Contexto de build da imagem do frontend: exclui node_modules, builds e
+# segredos para o `docker build` ficar rápido e nunca vazar .env para a imagem.
+# RESUMO: só o código-fonte entra no contexto do Docker.
+node_modules
+.next
+out
+.env
+.env.*
+!.env.exemplo

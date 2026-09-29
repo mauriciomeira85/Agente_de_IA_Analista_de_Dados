@@ -1,0 +1,47 @@
+# INTRODUÇÃO
+# Regras de exclusão do Git para o projeto Agente Analista de Dados.
+# Garante que segredos, dados locais, artefatos gerados e pastas de ferramentas de IA
+# nunca sejam versionados (a aplicação é pública; vazar segredo seria crítico).
+# RESUMO: exclui .env, Informacoes/, arquivos gerados, builds e pastas de IA.
+
+# Segredos e anotações locais
+.env
+.env.*
+!.env.exemplo
+Informacoes/
+
+# Arquivos gerados pelo agente (PDFs, planilhas, gráficos temporários)
+agente/arquivos_gerados/
+*.pdf
+*.xlsx
+!agente/avaliacao/*.pdf
+!agente/avaliacao/*.xlsx
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Ferramentas de IA
+.claude/
+.codex/
+.cursor/
+CLAUDE.md
+AGENTS.md
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+.venv-check/
+.cursorrules
+.windsurf/
+.aider*
+.copilot/

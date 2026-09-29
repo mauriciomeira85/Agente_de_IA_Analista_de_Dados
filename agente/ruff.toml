@@ -1,0 +1,12 @@
+# INTRODUÇÃO
+# Configuração do Ruff (lint Python) do serviço do agente. Regras enxutas:
+# erros reais (E/F), bugs prováveis (B), imports ordenados (I) e sintaxe
+# moderna (UP). Uso: `ruff check .` dentro de agente/.
+# RESUMO: lint simples e previsível, sem regras de estilo discutíveis.
+target-version = "py312"
+line-length = 110
+
+[lint]
+select = ["E", "F", "B", "I", "UP"]
+# Os scripts de avaliação/teste ajustam o sys.path antes de importar app.
+per-file-ignores = { "avaliacao/*" = ["E402"], "tests/*" = ["E402"] }

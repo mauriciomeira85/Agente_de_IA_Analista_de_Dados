@@ -1,0 +1,10 @@
+# INTRODUÇÃO
+# Contexto de build da imagem do agente: exclui caches, venvs e arquivos
+# gerados para o build ficar rápido e não vazar segredos.
+# RESUMO: só app/, avaliacao/, tests/ e requirements.txt entram no build.
+__pycache__
+.pytest_cache
+.ruff_cache
+.venv
+arquivos_gerados
+avaliacao/resultado_avaliacao.json
